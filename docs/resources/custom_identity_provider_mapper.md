@@ -55,6 +55,8 @@ The following arguments are supported:
 - `identity_provider_mapper` - (Required) The type of the identity provider mapper. This can be a format string that includes a `%s` - this will be replaced by the provider id.
 - `extra_config` - (Optional) Key/value attributes to add to the identity provider mapper model that is persisted to Keycloak. This can be used to extend the base model with new Keycloak features.
 
+  ~> The extra_config block allows you to specify attributes exactly as they appear in the Keycloak JSON API. This means if an attribute is nested or contains dots in the JSON representation (e.g., attribute.value), you must use the dotted key name in extra_config rather than a snake_case equivalent.
+
 ## Import
 
 Identity provider mappers can be imported using the format `{{realm_id}}/{{idp_alias}}/{{idp_mapper_id}}`, where `idp_alias` is the identity provider alias, and `idp_mapper_id` is the unique ID that Keycloak

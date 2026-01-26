@@ -50,18 +50,6 @@ func resourceKeycloakCustomIdentityProviderMapper() *schema.Resource {
 }
 
 func getCustomIdentityProviderMapperFromData(data *schema.ResourceData) *keycloak.CustomIdentityProviderMapper {
-	config := getExtraConfigFromData(data)
-
-	if v, ok := config["attribute_value"]; ok {
-		config["attribute.value"] = v
-		delete(config, "attribute_value")
-	}
-
-	if v, ok := config["claim_value"]; ok {
-		config["claim.value"] = v
-		delete(config, "claim_value")
-	}
-
 	return &keycloak.CustomIdentityProviderMapper{
 		Id:                     data.Id(),
 		Realm:                  data.Get("realm").(string),
@@ -69,7 +57,7 @@ func getCustomIdentityProviderMapperFromData(data *schema.ResourceData) *keycloa
 		IdentityProviderAlias:  data.Get("identity_provider_alias").(string),
 		IdentityProviderMapper: data.Get("identity_provider_mapper").(string),
 		Config: &keycloak.CustomIdentityProviderMapperConfig{
-			ExtraConfig: config,
+			ExtraConfig: getExtraConfigFromData(data),
 		},
 	}
 }
@@ -81,19 +69,7 @@ func setCustomIdentityProviderMapperData(data *schema.ResourceData, identityProv
 	data.Set("identity_provider_alias", identityProviderMapper.IdentityProviderAlias)
 	data.Set("identity_provider_mapper", identityProviderMapper.IdentityProviderMapper)
 
-	config := identityProviderMapper.Config.ExtraConfig
-
-	if v, ok := config["attribute.value"]; ok {
-		config["attribute_value"] = v
-		delete(config, "attribute.value")
-	}
-
-	if v, ok := config["claim.value"]; ok {
-		config["claim_value"] = v
-		delete(config, "claim.value")
-	}
-
-	setExtraConfigData(data, config)
+	setExtraConfigData(data, identityProviderMapper.Config.ExtraConfig)
 }
 
 func resourceKeycloakCustomIdentityProviderMapperCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {

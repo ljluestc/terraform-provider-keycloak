@@ -54,7 +54,7 @@ func TestAccKeycloakCustomIdentityProviderMapper_withExtraConfig(t *testing.T) {
 }
 
 
-func TestAccKeycloakCustomIdentityProviderMapper_withSnakeCaseKeys(t *testing.T) {
+func TestAccKeycloakCustomIdentityProviderMapper_withDottedKeys(t *testing.T) {
 	t.Parallel()
 	mapperName := acctest.RandomWithPrefix("tf-acc")
 	alias := acctest.RandomWithPrefix("tf-acc")
@@ -68,7 +68,7 @@ func TestAccKeycloakCustomIdentityProviderMapper_withSnakeCaseKeys(t *testing.T)
 		CheckDestroy:      testAccCheckKeycloakCustomIdentityProviderMapperDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testKeycloakCustomIdentityProviderMapper_withSnakeCaseKeys(alias, mapperType, mapperName, attributeName, attributeValue),
+				Config: testKeycloakCustomIdentityProviderMapper_withDottedKeys(alias, mapperType, mapperName, attributeName, attributeValue),
 				Check:  testAccCheckKeycloakCustomIdentityProviderMapperExists("keycloak_custom_identity_provider_mapper.oidc"),
 			},
 		},
@@ -334,12 +334,7 @@ resource keycloak_custom_identity_provider_mapper saml {
 	`, testAccRealm.Realm, mapper.IdentityProviderAlias, mapper.Name, mapper.IdentityProviderMapper, mapper.Config.Attribute, mapper.Config.UserAttribute)
 }
 
-func testKeycloakCustomIdentityProviderMapper_withSnakeCaseKeys(alias, mapperType, name, attributeName, attributeValue string) string {
-	realm := "my-realm"
-	if testAccRealm != nil {
-		realm = testAccRealm.Realm
-	}
-
+func testKeycloakCustomIdentityProviderMapper_withDottedKeys(alias, mapperType, name, attributeName, attributeValue string) string {
 	return fmt.Sprintf(`
 data "keycloak_realm" "realm" {
 	realm = "%s"
@@ -360,9 +355,9 @@ resource keycloak_custom_identity_provider_mapper oidc {
 	identity_provider_alias  = keycloak_oidc_identity_provider.oidc.alias
 	identity_provider_mapper = "%s"
 	extra_config 			= {
-		attribute_value   = "%s"
+		"attribute.value" = "%s"
 		attribute         = "%s"
 	}
 }
-	`, realm, alias, name, mapperType, attributeValue, attributeName)
+	`, testAccRealm.Realm, alias, name, mapperType, attributeValue, attributeName)
 }
