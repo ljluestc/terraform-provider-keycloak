@@ -41,6 +41,10 @@ func init() {
 }
 
 func TestMain(m *testing.M) {
+	if os.Getenv("SKIP_KEYCLOAK_SETUP") != "" {
+		os.Exit(m.Run())
+	}
+
 	testAccRealm = createTestRealm(testCtx)
 	testAccRealmTwo = createTestRealm(testCtx)
 	testAccRealmUserFederation = createTestRealm(testCtx)
