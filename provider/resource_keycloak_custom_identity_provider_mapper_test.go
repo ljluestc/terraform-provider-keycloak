@@ -53,6 +53,28 @@ func TestAccKeycloakCustomIdentityProviderMapper_withExtraConfig(t *testing.T) {
 	})
 }
 
+
+func TestAccKeycloakCustomIdentityProviderMapper_withDottedKeys(t *testing.T) {
+	t.Parallel()
+	mapperName := acctest.RandomWithPrefix("tf-acc")
+	alias := acctest.RandomWithPrefix("tf-acc")
+	mapperType := "hardcoded-attribute-idp-mapper"
+	attributeValue := acctest.RandomWithPrefix("tf-acc")
+	attributeName := acctest.RandomWithPrefix("tf-acc")
+
+	resource.Test(t, resource.TestCase{
+		ProviderFactories: testAccProviderFactories,
+		PreCheck:          func() { testAccPreCheck(t) },
+		CheckDestroy:      testAccCheckKeycloakCustomIdentityProviderMapperDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testKeycloakCustomIdentityProviderMapper_withDottedKeys(alias, mapperType, mapperName, attributeName, attributeValue),
+				Check:  testAccCheckKeycloakCustomIdentityProviderMapperExists("keycloak_custom_identity_provider_mapper.oidc"),
+			},
+		},
+	})
+}
+
 func TestAccKeycloakCustomIdentityProviderMapper_createAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var mapper = &keycloak.IdentityProviderMapper{}
@@ -310,4 +332,32 @@ resource keycloak_custom_identity_provider_mapper saml {
 	}
 }
 	`, testAccRealm.Realm, mapper.IdentityProviderAlias, mapper.Name, mapper.IdentityProviderMapper, mapper.Config.Attribute, mapper.Config.UserAttribute)
+}
+
+func testKeycloakCustomIdentityProviderMapper_withDottedKeys(alias, mapperType, name, attributeName, attributeValue string) string {
+	return fmt.Sprintf(`
+data "keycloak_realm" "realm" {
+	realm = "%s"
+}
+
+resource "keycloak_oidc_identity_provider" "oidc" {
+	realm             = data.keycloak_realm.realm.id
+	alias             = "%s"
+	authorization_url = "https://example.com/auth"
+	token_url         = "https://example.com/token"
+	client_id         = "example_id"
+	client_secret     = "example_token"
+}
+
+resource keycloak_custom_identity_provider_mapper oidc {
+	realm                    = data.keycloak_realm.realm.id
+	name                     = "%s"
+	identity_provider_alias  = keycloak_oidc_identity_provider.oidc.alias
+	identity_provider_mapper = "%s"
+	extra_config 			= {
+		"attribute.value" = "%s"
+		attribute         = "%s"
+	}
+}
+	`, testAccRealm.Realm, alias, name, mapperType, attributeValue, attributeName)
 }

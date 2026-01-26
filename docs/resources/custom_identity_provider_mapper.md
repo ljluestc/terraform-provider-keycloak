@@ -12,6 +12,8 @@ configuring a custom identity provider mapper via Terraform.
 
 ~> If you are using Keycloak 10 or higher, you will need to specify the `extra_config` argument in order to define a `syncMode` for the mapper.
 
+~> The `extra_config` block allows you to specify attributes exactly as they appear in the Keycloak JSON API. This means if an attribute is nested or contains dots in the JSON representation (e.g., `attribute.value`), you must use the dotted key name in `extra_config` rather than a snake_case equivalent.
+
 ## Example Usage
 
 ```hcl
